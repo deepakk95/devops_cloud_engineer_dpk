@@ -5,11 +5,11 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      - run: echo "hello Deepak" > ~/output.txt
+      - run: echo "hello Deepak" > ~/output1.txt
       - persist_to_workspace:
           root: ~/
           paths:
-            - output.txt
+            - output1.txt
 
   print_output_file:
     docker:
@@ -17,7 +17,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: cat ~/output.txt
+      - run: cat ~/output1.txt
 
 workflows:
   my_workflow:
