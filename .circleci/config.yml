@@ -23,6 +23,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: cat ~/output1.txt
+      - run: return 1
+      - run: 
+          name: on error
+          command: echo This is error
+          when: on fail
 
 workflows:
   my_workflow:
