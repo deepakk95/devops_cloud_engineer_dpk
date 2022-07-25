@@ -7,7 +7,7 @@ version: 2.1
 jobs:
   print_hello:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/base:2021.11
     steps:
       - run: echo hello 
           name: "echo an env var that is part of our project"
