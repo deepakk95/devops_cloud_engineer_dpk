@@ -27,7 +27,7 @@ jobs:
       - run: 
           name: on error
           command: echo This is error
-          when: on fail
+          when: on_fail
 
 workflows:
   my_workflow:
