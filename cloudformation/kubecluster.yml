@@ -3,20 +3,20 @@ Description: >
   It will create EKS Cluster
 Parameters:
   EnvironmentName:
-    Description: An Environment name that will be prefixed to resources
+    Description: The environment name will be mapped to the resources.
     Default: devops-cloud-engineer-deep
     Type: String
 
 Resources:
-  ClusterInstanceProfile:
+  ClusterProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: !Sub ${EnvironmentName}-cluster-profile
+      InstanceProfileName: !Sub ${EnvironmentName}-instance-profile
       Path: "/"
       Roles:
-        - !Ref EKSClusterRole
+        - !Ref ClusterRole
 
-  EKSClusterRole:
+  ClusterRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub ${EnvironmentName}-cluster-role
@@ -31,33 +31,33 @@ Resources:
               - sts:AssumeRole
       Path: "/"
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
         - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
         - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
 
-  CapstoneProjectCluster:
+  AmazonEKSCluster:
     Type: AWS::EKS::Cluster
     Properties:
       Version: "1.19"
       Name: !Sub ${EnvironmentName}-cluster
-      RoleArn: !GetAtt EKSClusterRole.Arn
+      RoleArn: !GetAtt ClusterRole.Arn
       ResourcesVpcConfig:
         SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${EnvironmentName}-SCG
+          - Fn::ImportValue: !Sub ${EnvironmentName}-sec-grp
         SubnetIds:
           Fn::Split:
             - ","
             - Fn::ImportValue:
-                Fn::Sub: ${EnvironmentName}-PUB-NETS
+                Fn::Sub: ${EnvironmentName}-public-subnets
 Outputs:
-  EksId:
-    Description: EKS id
-    Value: !Ref CapstoneProjectCluster
+  AmazonEksId:
+    Description: This is amazon EKS Cluster Id
+    Value: !Ref AmazonEKSCluster
     Export:
-      Name: !Sub ${EnvironmentName}-EKSCluster
+      Name: !Sub ${EnvironmentName}-AmazonEKSCluster
 
   EKSRoleArn:
-    Description: Role for accessing and creating aws resources
-    Value: !GetAtt EKSClusterRole.Arn
+    Description: This is the EKS Role for accessing the resources
+    Value: !GetAtt ClusterRole.Arn
     Export:
-      Name: !Sub ${EnvironmentName}-EKSRole
+      Name: !Sub ${EnvironmentName}-AmazonEKSRole

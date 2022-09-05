@@ -1,4 +1,4 @@
-- name: Copy service configuration
+- name:  Service configuration
   copy:
     src: "{{ ENVIRONMENT_NAME }}-service.yaml"
     dest: $HOME

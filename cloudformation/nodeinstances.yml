@@ -3,28 +3,28 @@ Description: >
   It will create the nodes for EKS Custer
 Parameters:
   EnvironmentName:
-    Description: An Environment name that will be prefixed to resources
+    Description: The environment name will be mapped to the resources.
     Default: devops-cloud-engineer-deep
     Type: String
 
   MinSize:
-    Description: Minimum number of web application servers
+    Description: It refers to minimum set of servers.
     Default: 2
     Type: String
 
+  DesiredSize:
+    Description: It refers to number of instances that should be created.
+    Default: 4
+    Type: Number    
+
   MaxSize:
-    Description: Maximum number of web application servers
+    Description: It refers to maximum set of servers.
     Default: 6
     Type: String
 
-  DesiredSize:
-    Description: How many instances should be created.
-    Default: 4
-    Type: Number
-
   KeyPairName:
-    Description: The EC2 Key Pair to allow SSH access to the instances
-    Default: udacity
+    Description: KeyPairName will be used to access the Instances.
+    Default: capstone
     Type: AWS::EC2::KeyPair::KeyName
 
 Mappings:
@@ -37,10 +37,10 @@ Mappings:
       ec2: ec2.amazonaws.com
 
 Resources:
-  NodeInstanceRole:
+  RoleNodeInstance:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub ${EnvironmentName}-nodegroup-role
+      RoleName: !Sub ${EnvironmentName}-node-grp-role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -51,18 +51,18 @@ Resources:
             Action:
               - "sts:AssumeRole"
       ManagedPolicyArns:
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
       Path: /
 
 
   NodeGroup:
     Type: AWS::EKS::Nodegroup
     Properties:
-      ClusterName: !Sub ${EnvironmentName}-cluster
-      NodeRole: !GetAtt NodeInstanceRole.Arn
-      NodegroupName: !Sub ${EnvironmentName}-nodegroup
+      ClusterName: !Sub ${EnvironmentName}-cluster-ng
+      NodeRole: !GetAtt RoleNodeInstance.Arn
+      NodegroupName: !Sub ${EnvironmentName}-nodegrp-name
       ScalingConfig:
         MinSize: !Ref MinSize
         MaxSize: !Ref MaxSize
@@ -71,16 +71,16 @@ Resources:
         Fn::Split:
           - ","
           - Fn::ImportValue:
-              Fn::Sub: ${EnvironmentName}-PUB-NETS
+              Fn::Sub: ${EnvironmentName}-public-subnets
 
 Outputs:
-  NodeInstanceRole:
-    Description: The node instance role
-    Value: !GetAtt NodeInstanceRole.Arn
+  RoleNodeInstance:
+    Description: This refers to node role for instance
+    Value: !GetAtt RoleNodeInstance.Arn
     Export:
-      Name: !Sub ${EnvironmentName}-IR
+      Name: !Sub ${EnvironmentName}-in-role
   NodeGroup:
-    Description: The node group for EKS
+    Description: This refers to node group for Amazon EKS
     Value: !Ref NodeGroup
     Export:
-      Name: !Sub ${EnvironmentName}-NG
+      Name: !Sub ${EnvironmentName}-node-grp

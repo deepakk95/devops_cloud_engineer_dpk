@@ -10,6 +10,6 @@
     chdir: $HOME
 
 - name: "Install the AWS CLI"
-  shell: ./aws/install
+  shell: sudo ./aws/install
   args:
     chdir: $HOME

@@ -1,0 +1,5 @@
+[
+  "EnvironmentName=devops-cloud-engineer-deep",
+  "amiImageId=ami-05fa00d4c63e32376",
+  "KeyPairName=capstone"
+]

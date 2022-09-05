@@ -4,54 +4,54 @@ Description: >
 
 Parameters:
   EnvironmentName:
-    Description: An Environment name that will be prefixed to resources
+    Description: The environment name will be mapped to the resources.
     Default: devops-cloud-engineer-deep
     Type: String
-  SSHKeyName:
-    Description: SSH key for management access
-    Default: udacity
+  KeyPairName:
+    Description: Key Pair will be used for the access to resource.
+    Default: capstone
     Type: String
   amiImageId:
-    Description: Defines the Image-ID of the OS to deploy
+    Description: This refers to ami id of the image.
     Default: ami-05fa00d4c63e32376
     Type: String
 
 Resources:
-  InstanceSecurityGroup:
+  SecurityGroupInstance:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: !Sub ${EnvironmentName}-management-SG
-      GroupDescription: Allow port 22 for management
+      GroupName: !Sub ${EnvironmentName}-management-sec-grp
+      GroupDescription: Port 22 will be used for security group
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
 
-  managementHost1:
+  managerHost1:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
       SecurityGroups:
-        - Ref: InstanceSecurityGroup
-      KeyName: !Ref SSHKeyName
+        - Ref: SecurityGroupInstance
+      KeyName: !Ref KeyPairName
       ImageId: !Ref amiImageId
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-management1
+          Value: !Sub ${EnvironmentName}-manager1
         - Key: Project
           Value: !Ref EnvironmentName
 
-  managementHost2:
+  managerHost2:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
       SecurityGroups:
-        - Ref: InstanceSecurityGroup
-      KeyName: !Ref SSHKeyName
+        - Ref: SecurityGroupInstance
+      KeyName: !Ref KeyPairName
       ImageId: !Ref amiImageId
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-management2
+          Value: !Sub ${EnvironmentName}-manager2
         - Key: Project
           Value: !Ref EnvironmentName

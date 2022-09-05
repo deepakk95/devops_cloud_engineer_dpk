@@ -5,11 +5,11 @@ Description: >
 
 Parameters:
   EnvironmentName:
-    Description: An environment name that will be prefixed to resource names
+    Description: The environment name will be mapped to the resources.
     Default: devops-cloud-engineer-deep
     Type: String
 
-  VpcCIDR:
+  VPCCIDR:
     Type: String
     Default: 192.168.0.0/16
     Description: The CIDR range for the VPC.
@@ -39,18 +39,18 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock:  !Ref VpcCIDR
+      CidrBlock:  !Ref VPCCIDR
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-VPC
+          Value: !Sub ${EnvironmentName}-virtual-private-cloud
 
   InternetGateway:
     Type: "AWS::EC2::InternetGateway"
 
-  VPCGatewayAttachment:
-    Type: "AWS::EC2::VPCGatewayAttachment"
+  AttachVPCGateway:
+    Type: "AWS::EC2::AttachVPCGateway"
     Properties:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
@@ -61,12 +61,12 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-Public-Subnets
+          Value: !Sub ${EnvironmentName}-pub-subnets
         - Key: Network
-          Value: !Sub ${EnvironmentName}-Public
+          Value: !Sub ${EnvironmentName}-public-network
 
   PublicRoute:
-    DependsOn: VPCGatewayAttachment
+    DependsOn: AttachVPCGateway
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PublicRouteTable
@@ -75,12 +75,12 @@ Resources:
 
   NatGateway1:
     DependsOn:
-      - NatGatewayEIP1
+      - NatGatewayLink1
       - PublicSubnet1
-      - VPCGatewayAttachment
+      - AttachVPCGateway
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt 'NatGatewayEIP1.AllocationId'
+      AllocationId: !GetAtt 'NatGatewayLink1.AllocationId'
       SubnetId: !Ref PublicSubnet1
       Tags:
         - Key: Name
@@ -88,27 +88,27 @@ Resources:
 
   NatGateway2:
     DependsOn:
-      - NatGatewayEIP2
+      - NatGatewayLink2
       - PublicSubnet2
-      - VPCGatewayAttachment
+      - AttachVPCGateway
     Type: AWS::EC2::NatGateway
     Properties:
-      AllocationId: !GetAtt 'NatGatewayEIP2.AllocationId'
+      AllocationId: !GetAtt 'NatGatewayLink2.AllocationId'
       SubnetId: !Ref PublicSubnet2
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-NatGatewayAZ2
 
-  NatGatewayEIP1:
+  NatGatewayLink1:
     DependsOn:
-      - VPCGatewayAttachment
+      - AttachVPCGateway
     Type: 'AWS::EC2::EIP'
     Properties:
       Domain: vpc
 
-  NatGatewayEIP2:
+  NatGatewayLink2:
     DependsOn:
-      - VPCGatewayAttachment
+      - AttachVPCGateway
     Type: 'AWS::EC2::EIP'
     Properties:
       Domain: vpc
@@ -130,7 +130,7 @@ Resources:
         Ref: VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-PublicSubnet1
+          Value: !Sub ${EnvironmentName}-pub-subnet1
         - Key: kubernetes.io/role/elb
           Value: 1
 
@@ -151,7 +151,7 @@ Resources:
         Ref: VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-PublicSubnet2
+          Value: !Sub ${EnvironmentName}-pub-subnet2
         - Key: kubernetes.io/role/elb
           Value: 1
 
@@ -167,10 +167,10 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
 
-  ControlPlaneSecurityGroup:
+  ClusterComSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Cluster communication with worker nodes
+      GroupDescription: This will be utilized by cluster to talk to the nodes.
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -180,37 +180,37 @@ Resources:
 
 Outputs:
   VPC:
-    Description: Reference to the EKS-VPC
+    Description: It will create a reference to virtual private cloud
     Value: !Ref VPC
     Export:
-      Name: !Sub ${EnvironmentName}-VPC
+      Name: !Sub ${EnvironmentName}-virtual-private-cloud
+
+  SubnetIds:
+    Description: These are the subnet ID's in the VPC
+    Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2 ] ]
+    Export:
+      Name: !Sub ${EnvironmentName}-public-subnets
+
+  SecurityGroup:
+    Description: This security group will be used to talk to the nodes by the cluster
+    Value: !Ref ClusterComSecGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-sec-grp      
 
   PublicRouteTable:
     Description: Public Routing Table
     Value: !Ref PublicRouteTable
     Export:
-      Name: !Sub ${EnvironmentName}-PUB-RT
-
-  SubnetIds:
-    Description: Subnets IDs in the VPC
-    Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2 ] ]
-    Export:
-      Name: !Sub ${EnvironmentName}-PUB-NETS
-
-  SecurityGroup:
-    Description: Security group for the cluster control plane communication with worker nodes
-    Value: !Ref ControlPlaneSecurityGroup
-    Export:
-      Name: !Sub ${EnvironmentName}-SCG
+      Name: !Sub ${EnvironmentName}-public-routetable
 
   PublicSubnet1:
-    Description: A reference to the public subnet in the 1st Availability Zone
+    Description: Public subnet in the 1st Availability Zone
     Value: !Ref PublicSubnet1
     Export:
-      Name: !Sub ${EnvironmentName}-PUB1-SN
+      Name: !Sub ${EnvironmentName}-public-subnet1
 
   PublicSubnet2:
-    Description: A reference to the public subnet in the 2nd Availability Zone
+    Description: Public subnet in the 2nd Availability Zone
     Value: !Ref PublicSubnet2
     Export:
-      Name: !Sub ${EnvironmentName}-PUB2-SN
+      Name: !Sub ${EnvironmentName}-public-subnet2

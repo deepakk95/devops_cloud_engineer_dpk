@@ -3,47 +3,47 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: python:3.7.3-stretch
+      - image: python:3.7-alpine3.11
 
     steps:
       - checkout
 
       - run:
-          name: install dependencies
+          name: Install the dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
+            python3 -m venv capstone
+            . capstone/bin/activate
             make install
 
       - run:
-          name: run lint
+          name: Run lint
           command: |
-            . venv/bin/activate
+            . capstone/bin/activate
             make lint
 
   upload-docker:
     docker:
-      - image: circleci/golang:1.15
+      - image: python:3.7.3-stretch
 
     working_directory: ~/repo
 
     steps:
-      - checkout 
+      - checkout
 
       - setup_remote_docker:
-          version: 19.03.13
+          version: 20.10.14
 
       - run:
-          name: Build docker container
+          name: Build docker image
           command: |
             docker build --tag=devops-cloud-engineer-deep .
             docker image ls
 
       - run:
-          name: Upload Docker to Dockerhub
+          name: Upload docker image to dockerhub
           command: |
             echo "Docker ID and Image: devops-cloud-engineer-deep"
-            docker login -u="deepakk95" -p="Deepak@06"
+            docker login -u="deepakk95" -p="*********"
             docker tag devops-cloud-engineer-deep deepakk95/devops-cloud-engineer-deep:$CIRCLE_WORKFLOW_ID
             docker push deepakk95/devops-cloud-engineer-deep:$CIRCLE_WORKFLOW_ID
 
@@ -53,138 +53,142 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install dependencies
+          name: Install the Dependencies
           command: yum install -y tar gzip
       - run:
-          name: Ensure EKS network exists
+          name: Create Amazon EKS Network
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/network.yml \
+              --template-file cloudFormation/vpc.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-eks-network" \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides file://cloudformation/network-parameters.json
+              --parameter-overrides file://cloudFormation/vpc-parameters.json
       - run:
-          name: Ensure EKS Cluster exists
+          name: Create Amazon EKS Cluster
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/cluster.yml \
+              --template-file cloudformation/kubecluster.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-eks-cluster" \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides file://cloudformation/cluster-parameters.json \
+              --parameter-overrides file://cloudFormation/kubecluster-parameters.json \
               --capabilities CAPABILITY_NAMED_IAM
-          no_output_timeout: 15m
+          no_output_timeout: 20m
       - run:
-          name: Ensure Nodegroup exists
+          name: Create NodeGroups ( Instances )
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/nodegroup.yml \
+              --template-file cloudformation/nodeinstances.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-eks-nodegroup" \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides file://cloudformation/nodegroup-parameters.json \
+              --parameter-overrides file://cloudFormation/nodeinstances-parameters.json \
               --capabilities CAPABILITY_NAMED_IAM
       - run:
-          name: Ensure management instances exists
+          name: Create Instances for Managing
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/management.yml \
+              --template-file cloudformation/manager.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-eks-management" \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides file://cloudformation/management-parameters.json \
-              --output text >> ~/checkIfDeployed.txt
-            cat ~/checkIfDeployed.txt
+              --parameter-overrides file://cloudFormation/manager-parameters.json \
+
       - run:
-          name: Extract the IPs of the management instances for Ansible
+          name: Fetch the IP Address for Manager Insances for Ansible
           command: |
-            echo [management] > ~/inventory.txt
+            echo [manager] > ~/inventory.txt
             aws ec2 describe-instances \
               --region "${AWS_DEFAULT_REGION}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-management*" \
+              --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-manager*" \
               --output text >> ~/inventory.txt
-            cat ~/inventory.txt
+
       - persist_to_workspace:
           root: ~/
           paths:
             - inventory.txt
-            - checkIfDeployed.txt
 
   configure-infrastructure:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      # - add_ssh_keys:
-      #     fingerprints:
-      #       - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
+      - add_ssh_keys:
+          fingerprints:
+            - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
+      - attach_workspace:
+          at: ~/
       - run:
-          name: Install dependencies
-          command: yum install -y tar gzip
-
+          name: Install  the Dependencies
+          command: |
+            apk add --update ansible
       - run:
           name: Configure server
           command: |
-            aws cloudformation deploy \
-              --template-file cloudformation/network1.yml \
-              --tags project=${ENVIRONMENT_NAME}1-project \
-              --stack-name "${ENVIRONMENT_NAME}1-eks-network" \
-              --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides file://cloudformation/network-parameters.json
+                cat ~/inventory.txt
+                cd ansible
+                ansible-playbook -i ~/inventory.txt configure-server.yml
 
   configure-cluster:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      # - add_ssh_keys:
-      #     fingerprints:
-      #       - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
+      - add_ssh_keys:
+          fingerprints:
+            - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
+      - attach_workspace:
+          at: ~/
       - run:
-          name: Install dependencies
-          command: yum install -y tar gzip
-      # - run:
-      #     name: Configure server
-      #     command: |
-      #       "echo Hello World!"
-      # - run:
-      #     name: Wait for LoadBalancer's domain to become reachable
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file cloudformation/network2.yml \
-      #         --tags project=${ENVIRONMENT_NAME}2-project \
-      #         --stack-name "${ENVIRONMENT_NAME}2-eks-network" \
-      #         --region ${AWS_DEFAULT_REGION} \
-      #         --parameter-overrides file://cloudformation/network-parameters.json
-      # - run:
-      #     name: Display the LoadBalancer's DNS name
-      #     command: |
-      #       "echo Hello World"
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - elb_dns.txt
+          name: Install the Dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Configure server
+          command: |
+                cat ~/inventory.txt
+                cd ansible
+                ansible-playbook -i ~/inventory.txt configure-cluster.yml
+      - run:
+          name: Wait for sometime
+          command: |
+                echo "Waiting 60 seconds before fetching Load balancer DNS name"
+                sleep 60
+      - run:
+          name: Fetch Load Balancer's DNS name
+          command: |
+            cat ~/inventory.txt
+            cd ansible
+            ansible-playbook -i ~/inventory.txt loadbalancerdns.yml
+            cat ~/loadbalancerdns.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - loadbalancerdns.txt
 
   deploy-docker:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      # - add_ssh_keys:
-      #     fingerprints:
-      #       - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
-      # - attach_workspace:
-      #     at: ~/
+      - add_ssh_keys:
+          fingerprints:
+            - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
+      - attach_workspace:
+          at: ~/
       - run:
-          name: Install dependencies
-          command: yum install -y tar gzip
-      # - run:
-      #     name: Deploy newest Docker Image
-      #     command: |
-      #       "echo Hello World! This is Hello World"
-      #     no_output_timeout: 2m
+          name: Install the Dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Deploy the docker image
+          command: |
+            cat ~/inventory.txt
+            cd ansible
+            ansible-playbook -i ~/inventory.txt deploy-app.yml
+          no_output_timeout: 5m
 
 workflows:
   default:
