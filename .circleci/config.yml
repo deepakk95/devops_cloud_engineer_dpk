@@ -114,7 +114,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       - add_ssh_keys:
@@ -129,19 +129,16 @@ jobs:
       - run:
           name: Configure server
           command: |
-            if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-              then
-                cat ~/inventory.txt
-                echo "Our management instances are already configured."
-              else
-                cat ~/inventory.txt
-                cd ansible
-                ansible-playbook -i ~/inventory.txt configure-server.yml
-              fi
+            aws cloudformation deploy \
+              --template-file cloudformation/network.yml \
+              --tags project=${ENVIRONMENT_NAME}1-project \
+              --stack-name "${ENVIRONMENT_NAME}1-eks-network" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/network-parameters.json
 
   configure-cluster:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       - add_ssh_keys:
@@ -160,7 +157,12 @@ jobs:
       - run:
           name: Wait for LoadBalancer's domain to become reachable
           command: |
-            "echo Hello World!"
+            aws cloudformation deploy \
+              --template-file cloudformation/network.yml \
+              --tags project=${ENVIRONMENT_NAME}2-project \
+              --stack-name "${ENVIRONMENT_NAME}2-eks-network" \
+              --region ${AWS_DEFAULT_REGION} \
+              --parameter-overrides file://cloudformation/network-parameters.json
       - run:
           name: Display the LoadBalancer's DNS name
           command: |
@@ -184,11 +186,11 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update ansible
-      - run:
-          name: Deploy newest Docker Image
-          command: |
-            "echo Hello World! This is Hello World"
-          no_output_timeout: 2m
+      # - run:
+      #     name: Deploy newest Docker Image
+      #     command: |
+      #       "echo Hello World! This is Hello World"
+      #     no_output_timeout: 2m
 
 workflows:
   default:
