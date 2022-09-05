@@ -23,7 +23,7 @@ This project is built using the skills learnt from Cloud Devops Engineer NanoDeg
 * If you're using Jenkins, create your Jenkins master box and install the plugins you will need.
 * If you're using Circle CI, set up your circle CI account and connect your git repository.
 * Set up your environment to which you will deploy code.
-</br/>
+<br/>
 
 3. Pick AWS Kubernetes as a Service, or build your own Kubernetes cluster.
 * Use Ansible or CloudFormation to build your “infrastructure”; i.e., the Kubernetes Cluster.
