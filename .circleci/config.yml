@@ -149,19 +149,19 @@ jobs:
       #     name: Configure server
       #     command: |
       #       "echo Hello World!"
-      - run:
-          name: Wait for LoadBalancer's domain to become reachable
-          command: |
-            aws cloudformation deploy \
-              --template-file cloudformation/network2.yml \
-              --tags project=${ENVIRONMENT_NAME}2-project \
-              --stack-name "${ENVIRONMENT_NAME}2-eks-network" \
-              --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides file://cloudformation/network-parameters.json
-      - run:
-          name: Display the LoadBalancer's DNS name
-          command: |
-            "echo Hello World"
+      # - run:
+      #     name: Wait for LoadBalancer's domain to become reachable
+      #     command: |
+      #       aws cloudformation deploy \
+      #         --template-file cloudformation/network2.yml \
+      #         --tags project=${ENVIRONMENT_NAME}2-project \
+      #         --stack-name "${ENVIRONMENT_NAME}2-eks-network" \
+      #         --region ${AWS_DEFAULT_REGION} \
+      #         --parameter-overrides file://cloudformation/network-parameters.json
+      # - run:
+      #     name: Display the LoadBalancer's DNS name
+      #     command: |
+      #       "echo Hello World"
       # - persist_to_workspace:
       #     root: ~/
       #     paths:
@@ -169,7 +169,7 @@ jobs:
 
   deploy-docker:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       # - add_ssh_keys:
@@ -179,8 +179,7 @@ jobs:
       #     at: ~/
       - run:
           name: Install dependencies
-          command: |
-            apk add --update ansible
+          command: yum install -y tar gzip
       # - run:
       #     name: Deploy newest Docker Image
       #     command: |
