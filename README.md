@@ -1,6 +1,6 @@
 # Cloud Devops Engineer Capstone Project
 
-This project is built using the skills learnt from Cloud Devops Engineer NanoDegree.
+This project is built using the skills learnt from Cloud Devops Engineer NanoDegree Program by Udacity.
 
 ## Skills Learned During the NanoDegree Program
 
