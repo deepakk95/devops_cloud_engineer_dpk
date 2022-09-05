@@ -4,7 +4,6 @@ jobs:
   build:
     docker:
       - image: python:3.7.3-stretch
-
     steps:
       - checkout
       - run:
@@ -22,9 +21,7 @@ jobs:
   upload-docker:
     docker:
       - image: docker:17.05.0-ce-git
-
     working_directory: ~/repo
-
     steps:
       - checkout
       - setup_remote_docker:

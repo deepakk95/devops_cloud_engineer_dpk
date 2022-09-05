@@ -1,6 +1,6 @@
 Description: >
   Devops Cloud Engineer / Deepak
-  It will create 2 hosts for managing EKS Cluster
+  It will create 2 hosts for managing EKS Cluster.
 
 Parameters:
   EnvironmentName:

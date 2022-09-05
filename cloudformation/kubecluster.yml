@@ -1,6 +1,6 @@
 Description: >
   Devops Cloud Engineer / Deepak
-  It will create EKS Cluster
+  It will create EKS Cluster.
 Parameters:
   EnvironmentName:
     Description: The environment name will be mapped to the resources.

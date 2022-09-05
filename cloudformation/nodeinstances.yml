@@ -1,6 +1,6 @@
 Description: >
   Devops Cloud Engineer / Deepak
-  It will create the nodes for EKS Custer
+  It will create the nodes for EKS Custer.
 Parameters:
   EnvironmentName:
     Description: The environment name will be mapped to the resources.

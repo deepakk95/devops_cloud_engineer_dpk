@@ -1,7 +1,7 @@
 ---
 Description: >
   Devops Cloud Engineer / Deepak
-  It will create a virtual private cloud that has public subnets for Amazon EKS
+  It will create a virtual private cloud that has public subnets for Amazon EKS.
 
 Parameters:
   EnvironmentName:
