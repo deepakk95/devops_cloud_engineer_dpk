@@ -117,15 +117,13 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
-      - attach_workspace:
-          at: ~/
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
       - run:
           name: Install dependencies
-          command: |
-            apk add --update ansible
+          command: yum install -y tar gzip
+
       - run:
           name: Configure server
           command: |
@@ -141,19 +139,16 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
-      - attach_workspace:
-          at: ~/
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
       - run:
           name: Install dependencies
-          command: |
-            apk add --update ansible
-      - run:
-          name: Configure server
-          command: |
-            "echo Hello World!"
+          command: yum install -y tar gzip
+      # - run:
+      #     name: Configure server
+      #     command: |
+      #       "echo Hello World!"
       - run:
           name: Wait for LoadBalancer's domain to become reachable
           command: |
@@ -167,21 +162,21 @@ jobs:
           name: Display the LoadBalancer's DNS name
           command: |
             "echo Hello World"
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - elb_dns.txt
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - elb_dns.txt
 
   deploy-docker:
     docker:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
-      - attach_workspace:
-          at: ~/
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "1f:b5:45:7e:c1:f7:13:d9:3c:ba:08:12:82:8d:39:37"
+      # - attach_workspace:
+      #     at: ~/
       - run:
           name: Install dependencies
           command: |
