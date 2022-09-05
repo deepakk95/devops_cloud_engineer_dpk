@@ -1,0 +1,5 @@
+[
+  "EnvironmentName=devops-cloud-engineer-dpk",
+  "SSHKeyName=udacity",
+  "amiImageId=ami-05fa00d4c63e32376"
+]

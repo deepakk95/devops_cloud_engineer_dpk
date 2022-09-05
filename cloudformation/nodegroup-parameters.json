@@ -1,0 +1,7 @@
+[
+  "EnvironmentName=devops-cloud-engineer-dpk",
+  "MinSize=2",
+  "MaxSize=6",
+  "DesiredSize=4",
+  "KeyPairName=udacity"
+]
