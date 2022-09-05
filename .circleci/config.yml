@@ -7,18 +7,16 @@ jobs:
 
     steps:
       - checkout
-
       - run:
           name: Install the dependencies
           command: |
-            python3 -m venv capstone
-            . capstone/bin/activate
+            python3 -m venv venv
+            . venv/bin/activate
             make install
-
       - run:
           name: Run lint
           command: |
-            . capstone/bin/activate
+            . venv/bin/activate
             make lint
 
   upload-docker:
@@ -29,16 +27,13 @@ jobs:
 
     steps:
       - checkout
-
       - setup_remote_docker:
           version: 20.10.14
-
       - run:
           name: Build docker image
           command: |
             docker build --tag=devops-cloud-engineer-deep .
             docker image ls
-
       - run:
           name: Upload docker image to dockerhub
           command: |
