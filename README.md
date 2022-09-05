@@ -20,7 +20,6 @@ The following clusters have been created in cloudformation:
 3. NodeInstances - It will create the nodes for EKS Custer.
 4. Manager - It will create 2 hosts for managing EKS Cluster.
 
-requirement.txt file serve as a list of items to be installed by pip
 
 Note - Please find the screenshots signifying successful running of the project.
 
