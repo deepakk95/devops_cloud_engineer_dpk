@@ -207,9 +207,9 @@ workflows:
       #     requires:
       #       - deploy-infrastructure
       - configure-cluster:
-          requires:
-            - configure-infrastructure
-            - upload-docker
+          # requires:
+          #   - configure-infrastructure
+          #   - upload-docker
       - deploy-docker:
           requires:
             - configure-cluster
