@@ -6,7 +6,7 @@ Description: >
 Parameters:
   EnvironmentName:
     Description: An environment name that will be prefixed to resource names
-    Default: devops-cloud-engineer-dpk
+    Default: devops-cloud-engineer-deep
     Type: String
 
   VpcCIDR:

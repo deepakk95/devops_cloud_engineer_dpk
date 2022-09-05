@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: devops-cloud-engineer-dpk-deployment
+  name: devops-cloud-engineer-deep-deployment
   labels:
-    app: devops-cloud-engineer-dpk-app
+    app: devops-cloud-engineer-deep-app
 spec:
   replicas: 4
   selector:
     matchLabels:
-      app: devops-cloud-engineer-dpk-app
+      app: devops-cloud-engineer-deep-app
   template:
     metadata:
       labels:
-        app: devops-cloud-engineer-dpk-app
+        app: devops-cloud-engineer-deep-app
     spec:
       containers:
-        - name: devops-cloud-engineer-dpk-app
-          image: deepakk95/devops-cloud-engineer-dpk
+        - name: devops-cloud-engineer-deep-app
+          image: deepakk95/devops-cloud-engineer-deep
           ports:
             - containerPort: 80

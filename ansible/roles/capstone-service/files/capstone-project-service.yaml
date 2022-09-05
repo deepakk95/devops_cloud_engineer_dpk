@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: devops-cloud-engineer-dpk-service
+  name: devops-cloud-engineer-deep-service
 spec:
   type: LoadBalancer
   selector:
-    app: devops-cloud-engineer-dpk-app
+    app: devops-cloud-engineer-deep-app
   ports:
     - protocol: TCP
       port: 80

@@ -1,5 +1,5 @@
 [
-  "EnvironmentName=devops-cloud-engineer-dpk",
+  "EnvironmentName=devops-cloud-engineer-deep",
   "MinSize=2",
   "MaxSize=6",
   "DesiredSize=4",
