@@ -21,5 +21,5 @@ The following clusters have been created in cloudformation:
 4. Manager - It will create 2 hosts for managing EKS Cluster. 
 
 
-Note - Please find the screenshots in Screenshots folder signifying successful running of the project. 
+Note - Please find the screenshots in Screenshots folder signifying successful running of the project.
 
