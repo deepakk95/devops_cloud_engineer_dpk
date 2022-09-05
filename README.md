@@ -18,7 +18,7 @@ The following clusters have been created in cloudformation:
 1. VPC - It will create a virtual private cloud that has public subnets for Amazon EKS.
 2. kubecluster - It will create EKS Cluster.
 3. NodeInstances - It will create the nodes for EKS Custer.
-4. Manager - It will create 2 hosts for managing EKS Cluster.
+4. Manager - It will create 2 hosts for managing EKS Cluster. 
 
 
 Note - Please find the screenshots signifying successful running of the project.
