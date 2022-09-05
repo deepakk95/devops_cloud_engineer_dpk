@@ -128,7 +128,7 @@ jobs:
           name: Configure server
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/network.yml \
+              --template-file cloudformation/network1.yml \
               --tags project=${ENVIRONMENT_NAME}1-project \
               --stack-name "${ENVIRONMENT_NAME}1-eks-network" \
               --region ${AWS_DEFAULT_REGION} \
@@ -153,7 +153,7 @@ jobs:
           name: Wait for LoadBalancer's domain to become reachable
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/network.yml \
+              --template-file cloudformation/network2.yml \
               --tags project=${ENVIRONMENT_NAME}2-project \
               --stack-name "${ENVIRONMENT_NAME}2-eks-network" \
               --region ${AWS_DEFAULT_REGION} \
@@ -191,21 +191,21 @@ workflows:
   default:
     jobs:
       - build
-      - upload-docker:
-          requires:
-            - build
-          filters:
-            branches:
-              only: [ master ]
-      - deploy-infrastructure:
-          requires:
-            - build
-          filters:
-            branches:
-              only: [ master ]
-      - configure-infrastructure:
-          requires:
-            - deploy-infrastructure
+      # - upload-docker:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: [ master ]
+      # - deploy-infrastructure:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: [ master ]
+      # - configure-infrastructure:
+      #     requires:
+      #       - deploy-infrastructure
       - configure-cluster:
           requires:
             - configure-infrastructure
