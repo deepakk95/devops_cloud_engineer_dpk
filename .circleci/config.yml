@@ -156,34 +156,15 @@ jobs:
       - run:
           name: Configure server
           command: |
-            if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-              then
-                cat ~/inventory.txt
-                echo "Our management instances are already configured."
-              else
-                cat ~/inventory.txt
-                cd ansible
-                ansible-playbook -i ~/inventory.txt configure-cluster.yml
-              fi
+            "echo Hello World!"
       - run:
           name: Wait for LoadBalancer's domain to become reachable
           command: |
-            if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-              then
-                cat ~/inventory.txt
-                echo "Our management instances are already configured."
-              else
-                cat ~/inventory.txt
-                echo "Wait 60 seconds..."
-                sleep 60
-              fi
+            "echo Hello World!"
       - run:
           name: Display the LoadBalancer's DNS name
           command: |
-            cat ~/inventory.txt
-            cd ansible
-            ansible-playbook -i ~/inventory.txt save-elb-dns.yml
-            cat ~/elb_dns.txt
+            "echo Hello World"
       - persist_to_workspace:
           root: ~/
           paths:
@@ -206,9 +187,7 @@ jobs:
       - run:
           name: Deploy newest Docker Image
           command: |
-            cat ~/inventory.txt
-            cd ansible
-            ansible-playbook -i ~/inventory.txt deploy-app.yml
+            "echo Hello World! This is Hello World"
           no_output_timeout: 2m
 
 workflows:
